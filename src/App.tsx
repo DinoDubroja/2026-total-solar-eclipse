@@ -1,30 +1,50 @@
-﻿import { useMemo, useState } from 'react'
+﻿import { useMemo, useState, type CSSProperties } from 'react'
+import {
+  EVENT_DURATION_MINUTES,
+  EVENT_START_UTC,
+  calculateEclipseObservation,
+  find2026LocalEclipseCircumstances,
+  type EclipseObservation,
+  type EclipseStatus,
+  type ObserverInput,
+} from './astronomy'
 import './App.css'
-
-const EVENT_START_UTC = Date.UTC(2026, 7, 12, 15, 35)
-const EVENT_END_UTC = Date.UTC(2026, 7, 12, 19, 59)
-const EVENT_DURATION_MINUTES = Math.round(
-  (EVENT_END_UTC - EVENT_START_UTC) / 60_000,
-)
 
 const DEFAULT_OBSERVER = {
   latitude: 41.6488,
   longitude: -0.8891,
-  elevation: 210,
+  elevationMeters: 210,
 }
 
-function formatUtcTime(totalMinutes: number) {
-  const date = new Date(EVENT_START_UTC + totalMinutes * 60_000)
+const DEFAULT_MINUTE_OFFSET = 175
 
+const STATUS_LABELS: Record<EclipseStatus, string> = {
+  'sun-below-horizon': 'Sun below horizon',
+  none: 'No eclipse',
+  partial: 'Partial eclipse',
+  annular: 'Annular eclipse',
+  total: 'Total eclipse',
+}
+
+function formatUtcTime(date: Date) {
   return new Intl.DateTimeFormat('en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
     timeZone: 'UTC',
     timeZoneName: 'short',
   }).format(date)
+}
+
+function formatAngle(value: number) {
+  return `${value.toFixed(2)}°`
+}
+
+function formatPercent(value: number) {
+  return `${Math.round(value * 100)}%`
 }
 
 function clampNumber(value: number, min: number, max: number) {
@@ -35,27 +55,86 @@ function clampNumber(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
 
+function normalizeDeltaDegrees(value: number) {
+  return ((((value + 180) % 360) + 360) % 360) - 180
+}
+
+function clampPercent(value: number, min = 8, max = 92) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function projectSkyPosition(altitudeDegrees: number, azimuthDegrees: number) {
+  const altitude = Math.min(Math.max(altitudeDegrees, 0), 90)
+  const radius = ((90 - altitude) / 90) * 42
+  const azimuthRadians = (azimuthDegrees * Math.PI) / 180
+
+  return {
+    x: clampPercent(50 + Math.sin(azimuthRadians) * radius),
+    y: clampPercent(50 - Math.cos(azimuthRadians) * radius),
+    belowHorizon: altitudeDegrees < 0,
+  }
+}
+
+function solarDiskStyle(observation: EclipseObservation) {
+  const meanAltitude =
+    ((observation.sun.altitudeDegrees + observation.moon.altitudeDegrees) / 2) *
+    (Math.PI / 180)
+  const azimuthDelta =
+    normalizeDeltaDegrees(
+      observation.moon.azimuthDegrees - observation.sun.azimuthDegrees,
+    ) * Math.cos(meanAltitude)
+  const altitudeDelta =
+    observation.moon.altitudeDegrees - observation.sun.altitudeDegrees
+  const solarRadius = observation.sun.apparentRadiusDegrees
+  const scale = observation.moon.apparentRadiusDegrees / solarRadius
+  const moonX = clampPercent(50 + (azimuthDelta / solarRadius) * 24, -20, 120)
+  const moonY = clampPercent(50 - (altitudeDelta / solarRadius) * 24, -20, 120)
+
+  return {
+    '--moon-x': `${moonX}%`,
+    '--moon-y': `${moonY}%`,
+    '--moon-scale': scale.toFixed(3),
+  } as CSSProperties
+}
+
+function skyBodyStyle(position: ReturnType<typeof projectSkyPosition>) {
+  return {
+    left: `${position.x}%`,
+    top: `${position.y}%`,
+  } as CSSProperties
+}
+
 function App() {
   const [latitude, setLatitude] = useState(DEFAULT_OBSERVER.latitude)
   const [longitude, setLongitude] = useState(DEFAULT_OBSERVER.longitude)
-  const [elevation, setElevation] = useState(DEFAULT_OBSERVER.elevation)
-  const [minuteOffset, setMinuteOffset] = useState(104)
+  const [elevation, setElevation] = useState(DEFAULT_OBSERVER.elevationMeters)
+  const [minuteOffset, setMinuteOffset] = useState(DEFAULT_MINUTE_OFFSET)
 
-  const preview = useMemo(() => {
-    const progress = minuteOffset / EVENT_DURATION_MINUTES
-    const sunX = 12 + progress * 76
-    const sunY = 66 - Math.sin(progress * Math.PI) * 38
-    const moonOffset = (progress - 0.5) * 44
+  const observerInput = useMemo<ObserverInput>(
+    () => ({ latitude, longitude, elevationMeters: elevation }),
+    [elevation, latitude, longitude],
+  )
+  const selectedTime = useMemo(
+    () => new Date(EVENT_START_UTC + minuteOffset * 60_000),
+    [minuteOffset],
+  )
+  const observation = useMemo(
+    () => calculateEclipseObservation(observerInput, selectedTime),
+    [observerInput, selectedTime],
+  )
+  const localCircumstances = useMemo(
+    () => find2026LocalEclipseCircumstances(observerInput),
+    [observerInput],
+  )
 
-    return {
-      progress,
-      sunX,
-      sunY,
-      moonX: sunX + moonOffset,
-      moonY: sunY - 1.5,
-      coverage: Math.max(0, 1 - Math.abs(progress - 0.5) * 2),
-    }
-  }, [minuteOffset])
+  const sunPosition = projectSkyPosition(
+    observation.sun.altitudeDegrees,
+    observation.sun.azimuthDegrees,
+  )
+  const moonPosition = projectSkyPosition(
+    observation.moon.altitudeDegrees,
+    observation.moon.azimuthDegrees,
+  )
 
   return (
     <main className="app-shell">
@@ -67,7 +146,7 @@ function App() {
             </div>
             <div>
               <p className="app-name">2026 Eclipse Planner</p>
-              <p className="app-status">Local prototype</p>
+              <p className="app-status">Astronomy core active</p>
             </div>
           </div>
 
@@ -136,7 +215,7 @@ function App() {
           <div className="readout-list" aria-label="Current selection">
             <div>
               <span>UTC time</span>
-              <strong>{formatUtcTime(minuteOffset)}</strong>
+              <strong>{formatUtcTime(selectedTime)}</strong>
             </div>
             <div>
               <span>Observer</span>
@@ -145,8 +224,18 @@ function App() {
               </strong>
             </div>
             <div>
-              <span>Elevation</span>
-              <strong>{Math.round(elevation)} m</strong>
+              <span>Sun alt / az</span>
+              <strong>
+                {formatAngle(observation.sun.altitudeDegrees)} /{' '}
+                {formatAngle(observation.sun.azimuthDegrees)}
+              </strong>
+            </div>
+            <div>
+              <span>Moon alt / az</span>
+              <strong>
+                {formatAngle(observation.moon.altitudeDegrees)} /{' '}
+                {formatAngle(observation.moon.azimuthDegrees)}
+              </strong>
             </div>
           </div>
         </div>
@@ -155,11 +244,11 @@ function App() {
           <div className="panel-header">
             <div>
               <h1>Sky Preview</h1>
-              <p>Sun and Moon geometry placeholder</p>
+              <p>Calculated from selected coordinates and UTC time</p>
             </div>
             <div className="coverage-meter">
-              <span>{Math.round(preview.coverage * 100)}%</span>
-              <small>demo overlap</small>
+              <span>{formatPercent(observation.obscuration)}</span>
+              <small>{STATUS_LABELS[observation.status]}</small>
             </div>
           </div>
 
@@ -170,31 +259,46 @@ function App() {
             <div className="azimuth-label west">W</div>
             <div className="horizon-line" />
             <div
-              className="sun-disc"
-              style={{
-                left: `${preview.sunX}%`,
-                top: `${preview.sunY}%`,
-              }}
+              className={`sky-body sun-marker${sunPosition.belowHorizon ? ' below-horizon' : ''}`}
+              style={skyBodyStyle(sunPosition)}
+              title={`Sun ${formatAngle(observation.sun.altitudeDegrees)} altitude, ${formatAngle(observation.sun.azimuthDegrees)} azimuth`}
             />
             <div
-              className="moon-disc"
-              style={{
-                left: `${preview.moonX}%`,
-                top: `${preview.moonY}%`,
-              }}
+              className={`sky-body moon-marker${moonPosition.belowHorizon ? ' below-horizon' : ''}`}
+              style={skyBodyStyle(moonPosition)}
+              title={`Moon ${formatAngle(observation.moon.altitudeDegrees)} altitude, ${formatAngle(observation.moon.azimuthDegrees)} azimuth`}
             />
           </div>
 
-          <div className="status-grid">
-            <article>
-              <span>Calculation core</span>
-              <strong>Next</strong>
-              <p>Wire in tested Sun, Moon, and observer geometry.</p>
+          <div className="details-grid">
+            <article className="solar-card">
+              <span>Solar disk</span>
+              <div className="solar-disc-preview" style={solarDiskStyle(observation)}>
+                <div className="solar-sun" />
+                <div className="solar-moon" />
+              </div>
+              <p>
+                Separation {formatAngle(observation.separationDegrees)}; Sun radius{' '}
+                {formatAngle(observation.sun.apparentRadiusDegrees)}, Moon radius{' '}
+                {formatAngle(observation.moon.apparentRadiusDegrees)}.
+              </p>
             </article>
             <article>
-              <span>Map layer</span>
-              <strong>Next</strong>
-              <p>Add totality path data and coordinate selection.</p>
+              <span>Local 2026 event</span>
+              {localCircumstances ? (
+                <>
+                  <strong>{localCircumstances.kind}</strong>
+                  <p>
+                    Peak {formatUtcTime(localCircumstances.peak.time)} at Sun altitude{' '}
+                    {formatAngle(localCircumstances.peak.sunAltitudeDegrees)}.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <strong>Not visible here</strong>
+                  <p>No visible local 2026 eclipse found for this observer.</p>
+                </>
+              )}
             </article>
             <article>
               <span>3D terrain</span>

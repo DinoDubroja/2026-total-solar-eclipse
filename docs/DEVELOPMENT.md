@@ -21,6 +21,7 @@ pnpm dev
 Before committing, run:
 
 ```powershell
+pnpm test
 pnpm lint
 pnpm build
 ```

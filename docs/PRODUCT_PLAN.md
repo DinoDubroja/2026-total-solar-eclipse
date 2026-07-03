@@ -6,11 +6,19 @@ Build an eclipse planning app where an observer can choose coordinates and inspe
 
 ## MVP
 
+Implemented foundation:
+
 - enter latitude, longitude, and elevation
 - scrub through the global eclipse time window
 - render Sun and Moon apparent overlap
 - show Sun position relative to the local horizon
-- report eclipse visibility and key event times for the selected location
+- report eclipse visibility and local peak circumstances for the selected location
+
+Next MVP refinements:
+
+- show partial and total contact times in the UI
+- add clearer time controls for stepping minute by minute
+- add a compact manual test script for each planning workflow
 
 ## Map View
 
@@ -28,10 +36,19 @@ Build an eclipse planning app where an observer can choose coordinates and inspe
 
 ## Scientific Core
 
+Implemented foundation:
+
 - separate astronomy calculations from UI components
-- write unit tests around geometry and contact-time calculations
+- calculate topocentric Sun and Moon altitude/azimuth
+- calculate apparent angular radii, separation, obscuration, and eclipse status
+- find local 2026 eclipse circumstances for the selected observer
+- unit-test geometry and Zaragoza totality behavior
+
+Next validation work:
+
 - validate sample locations against trusted eclipse references
-- keep source datasets documented and reproducible
+- document independent source datasets and validation tolerances
+- add regression fixtures for locations inside totality, partial-only regions, and no-eclipse regions
 
 ## User Testing
 

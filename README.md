@@ -2,7 +2,7 @@
 
 Interactive planning app for the total solar eclipse on 12 August 2026.
 
-The project is starting with a browser-based planning console. The first goal is a dependable local workflow, then a tested astronomy core, then map and 3D terrain views.
+The project is a browser-based planning console. It now has a tested astronomy core for topocentric Sun/Moon geometry, with map and 3D terrain views planned next.
 
 ## Run Locally
 
@@ -22,6 +22,7 @@ http://localhost:5173
 ## Scripts
 
 ```powershell
+pnpm test
 pnpm lint
 pnpm build
 pnpm preview
@@ -32,23 +33,25 @@ pnpm preview
 Current milestone:
 
 - React, TypeScript, and Vite project scaffold
-- local coordinate/time prototype screen
+- coordinate/time screen backed by astronomy calculations
+- tested Sun/Moon apparent geometry, angular overlap, and eclipse status classification
+- local 2026 eclipse circumstances for selected observer coordinates
 - reproducible dependency lockfile
 - GitHub repository connected
 
 Next milestones:
 
-- add tested Sun/Moon/observer geometry
-- validate eclipse overlap calculations against trusted references
 - add totality path map data
+- add click-to-select coordinates from a map
 - add 3D horizon and terrain planning mode
+- evaluate Cesium and Google Photorealistic 3D Tiles after API setup
 
 ## Source Data Direction
 
 The scientific layer should use trusted eclipse and ephemeris sources:
 
-- NASA eclipse/Besselian data for the 2026 August 12 event
-- Sun and Moon topocentric geometry from a tested astronomy library or generated ephemeris dataset
+- Astronomy Engine for topocentric Sun/Moon coordinates and local solar eclipse circumstances
+- NASA eclipse/Besselian data for independent validation of the 2026 August 12 event
 - open terrain data for numeric horizon analysis when needed
 - Google Photorealistic 3D Tiles as an optional visual planning layer after API setup
 
@@ -56,12 +59,13 @@ The scientific layer should use trusted eclipse and ephemeris sources:
 
 ```text
 src/
-  App.tsx        app shell and state wiring
-  App.css        app-specific layout and components
-  index.css      global design tokens and base styles
+  App.tsx             app shell and state wiring
+  App.css             app-specific layout and components
+  astronomy/          astronomy calculations and tests
+  index.css           global design tokens and base styles
 docs/
-  DEVELOPMENT.md development workflow
-  PRODUCT_PLAN.md product direction and milestones
+  DEVELOPMENT.md      development workflow
+  PRODUCT_PLAN.md     product direction and milestones
 ```
 
 Large references, planning exports, screenshots, and non-source material belong in the OneDrive project folder rather than this Git repository.
