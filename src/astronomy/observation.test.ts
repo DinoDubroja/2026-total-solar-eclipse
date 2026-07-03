@@ -4,11 +4,17 @@ import {
   calculateEclipseObservation,
   find2026LocalEclipseCircumstances,
 } from './observation'
+import {
+  noVisible2026EclipseFixtures,
+  partialOnlyEclipseFixtures,
+  totalEclipseFixtures,
+} from './validationFixtures'
 
-const zaragoza = {
-  latitude: 41.6488,
-  longitude: -0.8891,
-  elevationMeters: 210,
+const zaragoza = totalEclipseFixtures[0].observer
+
+function expectPartialContactsAreOrdered(local: NonNullable<ReturnType<typeof find2026LocalEclipseCircumstances>>) {
+  expect(local.partialBegin.time.getTime()).toBeLessThan(local.peak.time.getTime())
+  expect(local.peak.time.getTime()).toBeLessThan(local.partialEnd.time.getTime())
 }
 
 describe('eclipse observation core', () => {
@@ -44,6 +50,7 @@ describe('eclipse observation core', () => {
       throw new Error('Expected Zaragoza to have totality contacts')
     }
 
+    expectPartialContactsAreOrdered(local)
     expect(local.partialBegin.time.getTime()).toBeLessThan(local.totalBegin.time.getTime())
     expect(local.totalBegin.time.getTime()).toBeLessThan(local.peak.time.getTime())
     expect(local.peak.time.getTime()).toBeLessThan(local.totalEnd.time.getTime())
@@ -51,4 +58,52 @@ describe('eclipse observation core', () => {
     expect(local.totalityDurationSeconds).toBeGreaterThan(60)
     expect(local.partialDurationSeconds).toBeGreaterThan(local.totalityDurationSeconds ?? 0)
   })
+
+  it.each(totalEclipseFixtures)('matches the broad totality fixture for $label', (fixture) => {
+    const local = find2026LocalEclipseCircumstances(fixture.observer)
+
+    expect(local).not.toBeNull()
+    expect(local?.kind).toBe(fixture.kind)
+    expect(local?.obscuration).toBe(1)
+    expect(local?.peak.sunAltitudeDegrees).toBeGreaterThan(fixture.minPeakAltitudeDegrees)
+    expect(local?.totalBegin).toBeDefined()
+    expect(local?.totalEnd).toBeDefined()
+    expect(local?.totalityDurationSeconds).toBeGreaterThanOrEqual(
+      fixture.totalityDurationRangeSeconds[0],
+    )
+    expect(local?.totalityDurationSeconds).toBeLessThanOrEqual(
+      fixture.totalityDurationRangeSeconds[1],
+    )
+
+    if (local) {
+      expectPartialContactsAreOrdered(local)
+    }
+  })
+
+  it.each(partialOnlyEclipseFixtures)(
+    'matches the broad partial-only fixture for $label',
+    (fixture) => {
+      const local = find2026LocalEclipseCircumstances(fixture.observer)
+
+      expect(local).not.toBeNull()
+      expect(local?.kind).toBe(fixture.kind)
+      expect(local?.obscuration).toBeGreaterThanOrEqual(fixture.obscurationRange[0])
+      expect(local?.obscuration).toBeLessThanOrEqual(fixture.obscurationRange[1])
+      expect(local?.peak.sunAltitudeDegrees).toBeGreaterThan(fixture.minPeakAltitudeDegrees)
+      expect(local?.totalBegin).toBeUndefined()
+      expect(local?.totalEnd).toBeUndefined()
+      expect(local?.totalityDurationSeconds).toBeUndefined()
+
+      if (local) {
+        expectPartialContactsAreOrdered(local)
+      }
+    },
+  )
+
+  it.each(noVisible2026EclipseFixtures)(
+    'returns no local 2026 event for $label',
+    (fixture) => {
+      expect(find2026LocalEclipseCircumstances(fixture.observer)).toBeNull()
+    },
+  )
 })

@@ -18,7 +18,7 @@ Next MVP refinements:
 
 - add clearer time controls for stepping minute by minute
 - add a compact manual test script for each planning workflow
-- add more validation fixtures across total, partial-only, and no-eclipse locations
+- add independent validation tolerances for contact times and obscuration
 
 ## Map View
 
@@ -44,12 +44,13 @@ Implemented foundation:
 - find local 2026 eclipse circumstances for the selected observer
 - calculate partial duration and totality duration when contacts exist
 - unit-test geometry and Zaragoza totality behavior
+- regression-test total, partial-only, and no-visible 2026 fixture locations
 
 Next validation work:
 
 - validate sample locations against trusted eclipse references
-- document independent source datasets and validation tolerances
-- add regression fixtures for locations inside totality, partial-only regions, and no-eclipse regions
+- document independent source datasets and numerical tolerances
+- add fixtures for contact-time, magnitude, altitude, and azimuth tolerances
 
 ## User Testing
 
