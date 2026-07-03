@@ -15,6 +15,8 @@ Implemented foundation:
 - report eclipse visibility, contact times, and totality duration for the selected location
 - select observer coordinates from an approximate 2D coverage overlay
 - render a Google Maps 3D-ready planning surface when an API key is configured
+- adjust the planning camera with heading, tilt, and range controls
+- show a selected-location summary in the map context
 
 Next MVP refinements:
 
@@ -27,6 +29,8 @@ Next MVP refinements:
 Implemented foundation:
 
 - reserve the primary map area for Google Maps 3D
+- keep camera controls next to the 3D planning surface
+- show current eclipse state, local event, local peak, and Sun direction above the map
 - show an approximate totality path and central line in a local coverage selector
 - show a broad partial-eclipse visibility overlay
 - allow selecting observer coordinates from the coverage selector
@@ -34,7 +38,7 @@ Implemented foundation:
 
 Next map work:
 
-- add API-key backed Google Maps 3D validation in development
+- validate live Google Maps 3D rendering with an API key
 - move totality and partial-visibility overlays onto the Google map surface
 - replace approximate overlay geometry with authoritative path data
 - show clicked coordinates with local eclipse summary directly on the map

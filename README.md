@@ -2,7 +2,7 @@
 
 Interactive planning app for the total solar eclipse on 12 August 2026.
 
-The project is a browser-based planning console. It now has a tested astronomy core for topocentric Sun/Moon geometry, local contact times, apparent disk overlap, broad visibility fixtures, a Google Maps 3D-ready planning surface, and an approximate clickable coverage overlay.
+The project is a browser-based planning console. It now has a tested astronomy core for topocentric Sun/Moon geometry, local contact times, apparent disk overlap, broad visibility fixtures, a Google Maps 3D-ready planning surface with camera controls, a selected-location summary, and an approximate clickable coverage overlay.
 
 ## Run Locally
 
@@ -45,7 +45,8 @@ Current milestone:
 - tested Sun/Moon apparent geometry, angular overlap, and eclipse status classification
 - local 2026 eclipse contact times and totality duration for selected observer coordinates
 - broad regression fixtures for total, partial-only, and no-visible 2026 locations
-- Google Maps 3D-ready planning surface with local fallback
+- Google Maps 3D-ready planning surface with heading, tilt, and range controls
+- selected-location summary for current slider state, local event, peak, and Sun direction
 - approximate 2D coverage selector with click-to-set observer coordinates
 - symbolic sky direction markers separated from the apparent solar disk view
 - reproducible dependency lockfile
@@ -53,6 +54,7 @@ Current milestone:
 
 Next milestones:
 
+- validate Google 3D mode with a real API key
 - wire eclipse path overlays into the Google map surface
 - replace approximate map overlay with authoritative path data
 - add clearer time controls for stepping minute by minute

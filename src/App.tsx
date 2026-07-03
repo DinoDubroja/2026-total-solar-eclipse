@@ -140,6 +140,30 @@ function contactRows(localCircumstances: LocalEclipseCircumstances) {
   )
 }
 
+function localEventSummary(localCircumstances: LocalEclipseCircumstances | null) {
+  if (!localCircumstances) {
+    return 'No visible 2026 eclipse'
+  }
+
+  if (localCircumstances.totalityDurationSeconds !== undefined) {
+    return `${localCircumstances.kind} eclipse, ${formatDuration(
+      localCircumstances.totalityDurationSeconds,
+    )} totality`
+  }
+
+  return `${localCircumstances.kind} eclipse, max ${formatPercent(localCircumstances.obscuration)}`
+}
+
+function localPeakSummary(localCircumstances: LocalEclipseCircumstances | null) {
+  if (!localCircumstances?.peak) {
+    return 'No local peak found'
+  }
+
+  return `${formatUtcClock(localCircumstances.peak.time)}, Sun ${formatAngle(
+    localCircumstances.peak.sunAltitudeDegrees,
+  )}`
+}
+
 function App() {
   const [latitude, setLatitude] = useState(DEFAULT_OBSERVER.latitude)
   const [longitude, setLongitude] = useState(DEFAULT_OBSERVER.longitude)
@@ -161,6 +185,24 @@ function App() {
   const localCircumstances = useMemo(
     () => find2026LocalEclipseCircumstances(observerInput),
     [observerInput],
+  )
+
+  const mapSummaryItems = useMemo(
+    () => [
+      {
+        label: 'Current slider',
+        value: `${STATUS_LABELS[observation.status]}, ${formatPercent(observation.obscuration)}`,
+      },
+      { label: 'Local event', value: localEventSummary(localCircumstances) },
+      { label: 'Local peak', value: localPeakSummary(localCircumstances) },
+      {
+        label: 'Sun direction',
+        value: `${formatAngle(observation.sun.altitudeDegrees)} alt, ${formatAngle(
+          observation.sun.azimuthDegrees,
+        )} az`,
+      },
+    ],
+    [localCircumstances, observation],
   )
 
   const sunPosition = projectSkyPosition(
@@ -315,6 +357,7 @@ function App() {
           <EclipseMap
             latitude={latitude}
             longitude={longitude}
+            summaryItems={mapSummaryItems}
             onSelectCoordinates={(coordinates) => {
               setLatitude(Number(coordinates.latitude.toFixed(4)))
               setLongitude(Number(coordinates.longitude.toFixed(4)))

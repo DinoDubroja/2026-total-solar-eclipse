@@ -8,8 +8,22 @@ interface GoogleMaps3dViewProps {
 
 type MapStatus = 'not-configured' | 'loading' | 'ready' | 'error'
 
+const DEFAULT_CAMERA = {
+  heading: 235,
+  range: 1800,
+  tilt: 68,
+}
+
 function formatCenter(latitude: number, longitude: number) {
   return `${latitude.toFixed(6)},${longitude.toFixed(6)},650`
+}
+
+function clampNumber(value: number, min: number, max: number) {
+  if (Number.isNaN(value)) {
+    return min
+  }
+
+  return Math.min(Math.max(value, min), max)
 }
 
 export function GoogleMaps3dView({ latitude, longitude }: GoogleMaps3dViewProps) {
@@ -17,6 +31,9 @@ export function GoogleMaps3dView({ latitude, longitude }: GoogleMaps3dViewProps)
   const hostRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<HTMLElement | null>(null)
   const [status, setStatus] = useState<MapStatus>(apiKey ? 'loading' : 'not-configured')
+  const [heading, setHeading] = useState(DEFAULT_CAMERA.heading)
+  const [range, setRange] = useState(DEFAULT_CAMERA.range)
+  const [tilt, setTilt] = useState(DEFAULT_CAMERA.tilt)
 
   useEffect(() => {
     if (!apiKey) {
@@ -53,9 +70,6 @@ export function GoogleMaps3dView({ latitude, longitude }: GoogleMaps3dViewProps)
 
     if (!mapRef.current) {
       const mapElement = document.createElement('gmp-map-3d')
-      mapElement.setAttribute('tilt', '68')
-      mapElement.setAttribute('range', '1800')
-      mapElement.setAttribute('heading', '235')
       mapElement.setAttribute('mode', 'hybrid')
       mapElement.setAttribute('aria-label', 'Google photorealistic 3D observer map')
       mapRef.current = mapElement
@@ -63,7 +77,16 @@ export function GoogleMaps3dView({ latitude, longitude }: GoogleMaps3dViewProps)
     }
 
     mapRef.current.setAttribute('center', formatCenter(latitude, longitude))
-  }, [latitude, longitude, status])
+    mapRef.current.setAttribute('heading', heading.toString())
+    mapRef.current.setAttribute('range', range.toString())
+    mapRef.current.setAttribute('tilt', tilt.toString())
+  }, [heading, latitude, longitude, range, status, tilt])
+
+  function resetCamera() {
+    setHeading(DEFAULT_CAMERA.heading)
+    setRange(DEFAULT_CAMERA.range)
+    setTilt(DEFAULT_CAMERA.tilt)
+  }
 
   return (
     <div className="google-map-shell">
@@ -86,6 +109,77 @@ export function GoogleMaps3dView({ latitude, longitude }: GoogleMaps3dViewProps)
             <span>Using local planning overlay below</span>
           </div>
         )}
+      </div>
+
+      <div className="map-camera-controls" aria-label="3D map camera controls">
+        <div className="map-camera-control">
+          <span>Heading {heading} deg</span>
+          <div className="map-camera-control-row">
+            <input
+              aria-label="Heading degrees slider"
+              type="range"
+              min="0"
+              max="359"
+              value={heading}
+              onChange={(event) => setHeading(clampNumber(event.target.valueAsNumber, 0, 359))}
+            />
+            <input
+              aria-label="Heading degrees"
+              type="number"
+              min="0"
+              max="359"
+              value={heading}
+              onChange={(event) => setHeading(clampNumber(event.target.valueAsNumber, 0, 359))}
+            />
+          </div>
+        </div>
+        <div className="map-camera-control">
+          <span>Tilt {tilt} deg</span>
+          <div className="map-camera-control-row">
+            <input
+              aria-label="Tilt degrees slider"
+              type="range"
+              min="0"
+              max="80"
+              value={tilt}
+              onChange={(event) => setTilt(clampNumber(event.target.valueAsNumber, 0, 80))}
+            />
+            <input
+              aria-label="Tilt degrees"
+              type="number"
+              min="0"
+              max="80"
+              value={tilt}
+              onChange={(event) => setTilt(clampNumber(event.target.valueAsNumber, 0, 80))}
+            />
+          </div>
+        </div>
+        <div className="map-camera-control">
+          <span>Range {range} m</span>
+          <div className="map-camera-control-row">
+            <input
+              aria-label="Range meters slider"
+              type="range"
+              min="350"
+              max="6000"
+              step="50"
+              value={range}
+              onChange={(event) => setRange(clampNumber(event.target.valueAsNumber, 350, 6000))}
+            />
+            <input
+              aria-label="Range meters"
+              type="number"
+              min="350"
+              max="6000"
+              step="50"
+              value={range}
+              onChange={(event) => setRange(clampNumber(event.target.valueAsNumber, 350, 6000))}
+            />
+          </div>
+        </div>
+        <button type="button" className="map-camera-reset" onClick={resetCamera}>
+          Reset view
+        </button>
       </div>
     </div>
   )

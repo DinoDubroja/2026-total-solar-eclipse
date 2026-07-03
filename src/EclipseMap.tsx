@@ -14,9 +14,15 @@ import {
   type GeoPoint,
 } from './map/projection'
 
+interface MapSummaryItem {
+  label: string
+  value: string
+}
+
 interface EclipseMapProps {
   latitude: number
   longitude: number
+  summaryItems: readonly MapSummaryItem[]
   onSelectCoordinates: (coordinates: GeoPoint) => void
 }
 
@@ -29,7 +35,12 @@ const worldRegions = [
   'M286,134 C305,128 326,138 330,154 C314,163 288,161 278,149 Z',
 ]
 
-export function EclipseMap({ latitude, longitude, onSelectCoordinates }: EclipseMapProps) {
+export function EclipseMap({
+  latitude,
+  longitude,
+  summaryItems,
+  onSelectCoordinates,
+}: EclipseMapProps) {
   const selectedPoint = coordinatesToMapPoint({ latitude, longitude })
   const totalityPoints = coordinatesToSvgPolyline(totalityCenterline)
   const partialPoints = coordinatesToSvgPolyline(partialVisibilityPolygon)
@@ -55,6 +66,15 @@ export function EclipseMap({ latitude, longitude, onSelectCoordinates }: Eclipse
             {latitude.toFixed(3)}, {longitude.toFixed(3)}
           </strong>
         </div>
+      </div>
+
+      <div className="map-summary-grid" aria-label="Selected location summary">
+        {summaryItems.map((item) => (
+          <div key={item.label}>
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+          </div>
+        ))}
       </div>
 
       <GoogleMaps3dView latitude={latitude} longitude={longitude} />

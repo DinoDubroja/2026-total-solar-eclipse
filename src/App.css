@@ -92,6 +92,12 @@ input[type='number'] {
   padding: 0 12px;
 }
 
+.map-camera-control input[type='number'] {
+  height: 34px;
+  padding: 0 8px;
+  font-size: 0.86rem;
+}
+
 input[type='range'] {
   accent-color: var(--accent);
 }
@@ -120,6 +126,7 @@ input[type='range'] {
 .contact-list small,
 .event-summary small,
 .map-coordinate-readout span,
+.map-summary-grid span,
 .coverage-map-header span,
 .map-legend span {
   color: var(--text-muted);
@@ -129,6 +136,7 @@ input[type='range'] {
 }
 
 .readout-list strong,
+.map-summary-grid strong,
 .details-grid strong {
   color: var(--text-strong);
 }
@@ -309,6 +317,26 @@ h1 {
   color: var(--text-strong);
 }
 
+.map-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.map-summary-grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--surface-subtle);
+}
+
+.map-summary-grid strong {
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+}
+
 .google-map-shell {
   overflow: hidden;
   min-height: 340px;
@@ -341,6 +369,51 @@ h1 {
 .google-map-placeholder span {
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+.map-camera-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  background: #ffffff;
+}
+
+.map-camera-control {
+  display: grid;
+  gap: 7px;
+}
+
+.map-camera-control-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  gap: 8px;
+  align-items: center;
+}
+
+.map-camera-control span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.map-camera-reset {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--text-strong);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.map-camera-reset:hover {
+  border-color: var(--accent);
 }
 
 .coverage-map-block {
@@ -563,6 +636,7 @@ h1 {
 
   .panel-header,
   .map-header,
+  .map-summary-grid,
   .details-grid {
     grid-template-columns: 1fr;
   }
@@ -574,6 +648,10 @@ h1 {
   .coverage-meter,
   .map-coordinate-readout {
     justify-items: start;
+  }
+
+  .map-camera-controls {
+    grid-template-columns: 1fr;
   }
 
   .google-map-shell,
