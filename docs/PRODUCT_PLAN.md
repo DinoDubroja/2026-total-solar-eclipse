@@ -13,7 +13,8 @@ Implemented foundation:
 - render Sun and Moon apparent overlap
 - show Sun and Moon direction markers relative to the local horizon
 - report eclipse visibility, contact times, and totality duration for the selected location
-- select observer coordinates from an approximate 2D eclipse map
+- select observer coordinates from an approximate 2D coverage overlay
+- render a Google Maps 3D-ready planning surface when an API key is configured
 
 Next MVP refinements:
 
@@ -25,15 +26,17 @@ Next MVP refinements:
 
 Implemented foundation:
 
-- show an approximate totality path and central line
+- reserve the primary map area for Google Maps 3D
+- show an approximate totality path and central line in a local coverage selector
 - show a broad partial-eclipse visibility overlay
-- allow selecting observer coordinates from the map
+- allow selecting observer coordinates from the coverage selector
 - keep manual coordinate entry available
 
 Next map work:
 
+- add API-key backed Google Maps 3D validation in development
+- move totality and partial-visibility overlays onto the Google map surface
 - replace approximate overlay geometry with authoritative path data
-- add map zoom/pan or focused Europe/North Atlantic view
 - show clicked coordinates with local eclipse summary directly on the map
 
 ## 3D Planning View
@@ -41,7 +44,7 @@ Next map work:
 - render a local sky dome with horizon direction labels
 - add orbit/pan controls for inspection
 - overlay the Sun direction at selected times
-- later, use Cesium with Google Photorealistic 3D Tiles for visual terrain and building context
+- use Google Maps JavaScript 3D Maps for visual terrain and building context
 
 ## Scientific Core
 

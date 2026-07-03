@@ -1,4 +1,5 @@
 import { type PointerEvent } from 'react'
+import { GoogleMaps3dView } from './GoogleMaps3dView'
 import {
   partialVisibilityPolygon,
   referenceCities,
@@ -45,8 +46,8 @@ export function EclipseMap({ latitude, longitude, onSelectCoordinates }: Eclipse
     <section className="map-panel" aria-label="Eclipse map">
       <div className="map-header">
         <div>
-          <h2>Eclipse Map</h2>
-          <p>Approximate 2026 visibility overlay</p>
+          <h2>Planning Map</h2>
+          <p>Google 3D surface with local eclipse overlay fallback</p>
         </div>
         <div className="map-coordinate-readout">
           <span>Selected</span>
@@ -56,56 +57,64 @@ export function EclipseMap({ latitude, longitude, onSelectCoordinates }: Eclipse
         </div>
       </div>
 
-      <svg
-        className="world-map"
-        viewBox={`0 0 ${MAP_VIEWBOX_WIDTH} ${MAP_VIEWBOX_HEIGHT}`}
-        role="img"
-        aria-label="Approximate eclipse visibility map"
-        onPointerDown={handlePointerDown}
-      >
-        <rect className="map-ocean" width={MAP_VIEWBOX_WIDTH} height={MAP_VIEWBOX_HEIGHT} />
-        {[-120, -60, 0, 60, 120].map((longitudeLine) => (
-          <line
-            className="map-grid"
-            key={`lon-${longitudeLine}`}
-            x1={longitudeLine + 180}
-            x2={longitudeLine + 180}
-            y1="0"
-            y2={MAP_VIEWBOX_HEIGHT}
-          />
-        ))}
-        {[-60, -30, 0, 30, 60].map((latitudeLine) => (
-          <line
-            className="map-grid"
-            key={`lat-${latitudeLine}`}
-            x1="0"
-            x2={MAP_VIEWBOX_WIDTH}
-            y1={90 - latitudeLine}
-            y2={90 - latitudeLine}
-          />
-        ))}
-        {worldRegions.map((path) => (
-          <path className="map-land" d={path} key={path} />
-        ))}
-        <polygon className="partial-zone" points={partialPoints} />
-        <polyline className="totality-band" points={totalityPoints} />
-        <polyline className="central-line" points={totalityPoints} />
-        {referenceCities.map((city) => {
-          const point = coordinatesToMapPoint(city)
-          return (
-            <g className="map-city" key={city.id}>
-              <circle cx={point.x} cy={point.y} r="1.7" />
-              <text x={point.x + 3} y={point.y - 2}>
-                {city.label}
-              </text>
-            </g>
-          )
-        })}
-        <g className="selected-map-point">
-          <circle cx={selectedPoint.x} cy={selectedPoint.y} r="5.5" />
-          <circle cx={selectedPoint.x} cy={selectedPoint.y} r="2" />
-        </g>
-      </svg>
+      <GoogleMaps3dView latitude={latitude} longitude={longitude} />
+
+      <div className="coverage-map-block">
+        <div className="coverage-map-header">
+          <span>Coverage selector</span>
+          <small>Approximate path data</small>
+        </div>
+        <svg
+          className="world-map"
+          viewBox={`0 0 ${MAP_VIEWBOX_WIDTH} ${MAP_VIEWBOX_HEIGHT}`}
+          role="img"
+          aria-label="Approximate eclipse visibility map"
+          onPointerDown={handlePointerDown}
+        >
+          <rect className="map-ocean" width={MAP_VIEWBOX_WIDTH} height={MAP_VIEWBOX_HEIGHT} />
+          {[-120, -60, 0, 60, 120].map((longitudeLine) => (
+            <line
+              className="map-grid"
+              key={`lon-${longitudeLine}`}
+              x1={longitudeLine + 180}
+              x2={longitudeLine + 180}
+              y1="0"
+              y2={MAP_VIEWBOX_HEIGHT}
+            />
+          ))}
+          {[-60, -30, 0, 30, 60].map((latitudeLine) => (
+            <line
+              className="map-grid"
+              key={`lat-${latitudeLine}`}
+              x1="0"
+              x2={MAP_VIEWBOX_WIDTH}
+              y1={90 - latitudeLine}
+              y2={90 - latitudeLine}
+            />
+          ))}
+          {worldRegions.map((path) => (
+            <path className="map-land" d={path} key={path} />
+          ))}
+          <polygon className="partial-zone" points={partialPoints} />
+          <polyline className="totality-band" points={totalityPoints} />
+          <polyline className="central-line" points={totalityPoints} />
+          {referenceCities.map((city) => {
+            const point = coordinatesToMapPoint(city)
+            return (
+              <g className="map-city" key={city.id}>
+                <circle cx={point.x} cy={point.y} r="1.7" />
+                <text x={point.x + 3} y={point.y - 2}>
+                  {city.label}
+                </text>
+              </g>
+            )
+          })}
+          <g className="selected-map-point">
+            <circle cx={selectedPoint.x} cy={selectedPoint.y} r="5.5" />
+            <circle cx={selectedPoint.x} cy={selectedPoint.y} r="2" />
+          </g>
+        </svg>
+      </div>
 
       <div className="map-legend" aria-label="Map legend">
         <span className="legend-totality">Totality path</span>

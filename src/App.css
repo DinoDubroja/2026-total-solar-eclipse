@@ -120,6 +120,7 @@ input[type='range'] {
 .contact-list small,
 .event-summary small,
 .map-coordinate-readout span,
+.coverage-map-header span,
 .map-legend span {
   color: var(--text-muted);
   font-size: 0.78rem;
@@ -308,6 +309,54 @@ h1 {
   color: var(--text-strong);
 }
 
+.google-map-shell {
+  overflow: hidden;
+  min-height: 340px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #dce7ec;
+}
+
+.google-map-canvas,
+.google-map-canvas gmp-map-3d {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 340px;
+}
+
+.google-map-placeholder {
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  min-height: 340px;
+  padding: 24px;
+  background:
+    linear-gradient(135deg, rgba(47, 111, 237, 0.12), rgba(246, 196, 83, 0.14)),
+    #eef5f8;
+  color: var(--text-strong);
+  text-align: center;
+}
+
+.google-map-placeholder span {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.coverage-map-block {
+  display: grid;
+  gap: 8px;
+}
+
+.coverage-map-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.coverage-map-header small {
+  color: var(--text-muted);
+}
 .world-map {
   width: 100%;
   aspect-ratio: 2 / 1;
@@ -525,6 +574,13 @@ h1 {
   .coverage-meter,
   .map-coordinate-readout {
     justify-items: start;
+  }
+
+  .google-map-shell,
+  .google-map-canvas,
+  .google-map-canvas gmp-map-3d,
+  .google-map-placeholder {
+    min-height: 260px;
   }
 
   .world-map {

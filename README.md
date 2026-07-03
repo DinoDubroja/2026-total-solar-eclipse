@@ -2,7 +2,7 @@
 
 Interactive planning app for the total solar eclipse on 12 August 2026.
 
-The project is a browser-based planning console. It now has a tested astronomy core for topocentric Sun/Moon geometry, local contact times, apparent disk overlap, broad visibility fixtures, and an approximate clickable map overlay, with 3D terrain views planned next.
+The project is a browser-based planning console. It now has a tested astronomy core for topocentric Sun/Moon geometry, local contact times, apparent disk overlap, broad visibility fixtures, a Google Maps 3D-ready planning surface, and an approximate clickable coverage overlay.
 
 ## Run Locally
 
@@ -18,6 +18,14 @@ Open the local URL printed by Vite, usually:
 ```text
 http://localhost:5173
 ```
+
+Google 3D maps are optional during local development. To enable them, create `.env.local` and add:
+
+```text
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_platform_key
+```
+
+Without that key, the app keeps the local coverage selector visible so coordinate testing still works.
 
 ## Scripts
 
@@ -37,17 +45,18 @@ Current milestone:
 - tested Sun/Moon apparent geometry, angular overlap, and eclipse status classification
 - local 2026 eclipse contact times and totality duration for selected observer coordinates
 - broad regression fixtures for total, partial-only, and no-visible 2026 locations
-- approximate 2D eclipse map with click-to-set observer coordinates
+- Google Maps 3D-ready planning surface with local fallback
+- approximate 2D coverage selector with click-to-set observer coordinates
 - symbolic sky direction markers separated from the apparent solar disk view
 - reproducible dependency lockfile
 - GitHub repository connected
 
 Next milestones:
 
+- wire eclipse path overlays into the Google map surface
 - replace approximate map overlay with authoritative path data
 - add clearer time controls for stepping minute by minute
 - add 3D horizon and terrain planning mode
-- evaluate Cesium and Google Photorealistic 3D Tiles after API setup
 
 ## Source Data Direction
 
@@ -56,7 +65,7 @@ The scientific layer should use trusted eclipse and ephemeris sources:
 - Astronomy Engine for topocentric Sun/Moon coordinates and local solar eclipse circumstances
 - NASA eclipse/Besselian data for independent validation of the 2026 August 12 event
 - open terrain data for numeric horizon analysis when needed
-- Google Photorealistic 3D Tiles as an optional visual planning layer after API setup
+- Google Maps JavaScript 3D Maps as the visual planning layer after API setup
 
 ## Repository Layout
 
@@ -64,9 +73,11 @@ The scientific layer should use trusted eclipse and ephemeris sources:
 src/
   App.tsx             app shell and state wiring
   App.css             app-specific layout and components
-  EclipseMap.tsx      approximate map surface
+  EclipseMap.tsx      planning map surface and local coverage selector
+  GoogleMaps3dView.tsx Google Maps 3D mount point
   astronomy/          astronomy calculations and tests
   map/                map projection and approximate overlay data
+  maps/               Google Maps loader helpers
   index.css           global design tokens and base styles
 docs/
   DEVELOPMENT.md      development workflow
