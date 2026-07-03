@@ -13,6 +13,7 @@ Implemented foundation:
 - render Sun and Moon apparent overlap
 - show Sun and Moon direction markers relative to the local horizon
 - report eclipse visibility, contact times, and totality duration for the selected location
+- select observer coordinates from an approximate 2D eclipse map
 
 Next MVP refinements:
 
@@ -22,10 +23,18 @@ Next MVP refinements:
 
 ## Map View
 
-- show the totality path and central line
-- show broader partial-eclipse visibility when data is available
-- allow clicking the map to set observer coordinates
+Implemented foundation:
+
+- show an approximate totality path and central line
+- show a broad partial-eclipse visibility overlay
+- allow selecting observer coordinates from the map
 - keep manual coordinate entry available
+
+Next map work:
+
+- replace approximate overlay geometry with authoritative path data
+- add map zoom/pan or focused Europe/North Atlantic view
+- show clicked coordinates with local eclipse summary directly on the map
 
 ## 3D Planning View
 
@@ -45,6 +54,7 @@ Implemented foundation:
 - calculate partial duration and totality duration when contacts exist
 - unit-test geometry and Zaragoza totality behavior
 - regression-test total, partial-only, and no-visible 2026 fixture locations
+- unit-test map projection round trips for click-to-coordinate behavior
 
 Next validation work:
 

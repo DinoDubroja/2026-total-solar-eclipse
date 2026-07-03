@@ -1,4 +1,5 @@
 import { useMemo, useState, type CSSProperties } from 'react'
+import { EclipseMap } from './EclipseMap'
 import {
   EVENT_DURATION_MINUTES,
   EVENT_START_UTC,
@@ -51,7 +52,7 @@ function formatUtcClock(date: Date) {
 }
 
 function formatAngle(value: number) {
-  return `${value.toFixed(2)}°`
+  return `${value.toFixed(2)} deg`
 }
 
 function formatPercent(value: number) {
@@ -310,6 +311,15 @@ function App() {
               aria-label={`Moon direction ${formatAngle(observation.moon.altitudeDegrees)} altitude, ${formatAngle(observation.moon.azimuthDegrees)} azimuth`}
             />
           </div>
+
+          <EclipseMap
+            latitude={latitude}
+            longitude={longitude}
+            onSelectCoordinates={(coordinates) => {
+              setLatitude(Number(coordinates.latitude.toFixed(4)))
+              setLongitude(Number(coordinates.longitude.toFixed(4)))
+            }}
+          />
 
           <div className="details-grid">
             <article className="solar-card">
