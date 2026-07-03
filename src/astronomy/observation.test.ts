@@ -1,4 +1,4 @@
-﻿import { EclipseKind } from 'astronomy-engine'
+import { EclipseKind } from 'astronomy-engine'
 import { describe, expect, it } from 'vitest'
 import {
   calculateEclipseObservation,
@@ -29,7 +29,7 @@ describe('eclipse observation core', () => {
     expect(Math.abs(spain.sun.azimuthDegrees - newYork.sun.azimuthDegrees)).toBeGreaterThan(10)
   })
 
-  it('finds the 2026 local total eclipse circumstances for Zaragoza', () => {
+  it('finds ordered 2026 local total eclipse circumstances for Zaragoza', () => {
     const local = find2026LocalEclipseCircumstances(zaragoza)
 
     expect(local).not.toBeNull()
@@ -39,5 +39,16 @@ describe('eclipse observation core', () => {
     expect(local?.peak.sunAltitudeDegrees).toBeGreaterThan(5)
     expect(local?.totalBegin).toBeDefined()
     expect(local?.totalEnd).toBeDefined()
+
+    if (!local?.totalBegin || !local.totalEnd) {
+      throw new Error('Expected Zaragoza to have totality contacts')
+    }
+
+    expect(local.partialBegin.time.getTime()).toBeLessThan(local.totalBegin.time.getTime())
+    expect(local.totalBegin.time.getTime()).toBeLessThan(local.peak.time.getTime())
+    expect(local.peak.time.getTime()).toBeLessThan(local.totalEnd.time.getTime())
+    expect(local.totalEnd.time.getTime()).toBeLessThan(local.partialEnd.time.getTime())
+    expect(local.totalityDurationSeconds).toBeGreaterThan(60)
+    expect(local.partialDurationSeconds).toBeGreaterThan(local.totalityDurationSeconds ?? 0)
   })
 })

@@ -11,14 +11,14 @@ Implemented foundation:
 - enter latitude, longitude, and elevation
 - scrub through the global eclipse time window
 - render Sun and Moon apparent overlap
-- show Sun position relative to the local horizon
-- report eclipse visibility and local peak circumstances for the selected location
+- show Sun and Moon direction markers relative to the local horizon
+- report eclipse visibility, contact times, and totality duration for the selected location
 
 Next MVP refinements:
 
-- show partial and total contact times in the UI
 - add clearer time controls for stepping minute by minute
 - add a compact manual test script for each planning workflow
+- add more validation fixtures across total, partial-only, and no-eclipse locations
 
 ## Map View
 
@@ -42,6 +42,7 @@ Implemented foundation:
 - calculate topocentric Sun and Moon altitude/azimuth
 - calculate apparent angular radii, separation, obscuration, and eclipse status
 - find local 2026 eclipse circumstances for the selected observer
+- calculate partial duration and totality duration when contacts exist
 - unit-test geometry and Zaragoza totality behavior
 
 Next validation work:

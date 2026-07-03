@@ -1,4 +1,4 @@
-﻿import {
+import {
   Body,
   EclipseKind,
   Equator,
@@ -50,6 +50,8 @@ export interface LocalEclipseCircumstances {
   peak: EclipseEventSummary
   totalEnd?: EclipseEventSummary
   partialEnd: EclipseEventSummary
+  partialDurationSeconds: number
+  totalityDurationSeconds?: number
 }
 
 function observeBody(
@@ -120,6 +122,10 @@ function summarizeEvent(event: { time: { date: Date }; altitude: number }): Ecli
   }
 }
 
+function secondsBetween(start: Date, end: Date) {
+  return (end.getTime() - start.getTime()) / 1000
+}
+
 export function find2026LocalEclipseCircumstances(
   observerInput: ObserverInput,
 ): LocalEclipseCircumstances | null {
@@ -135,14 +141,22 @@ export function find2026LocalEclipseCircumstances(
     return null
   }
 
+  const partialBegin = summarizeEvent(local.partial_begin)
+  const partialEnd = summarizeEvent(local.partial_end)
+  const totalBegin = local.total_begin ? summarizeEvent(local.total_begin) : undefined
+  const totalEnd = local.total_end ? summarizeEvent(local.total_end) : undefined
+
   return {
     kind: local.kind,
     obscuration: local.obscuration,
-    partialBegin: summarizeEvent(local.partial_begin),
-    totalBegin: local.total_begin ? summarizeEvent(local.total_begin) : undefined,
+    partialBegin,
+    totalBegin,
     peak: summarizeEvent(local.peak),
-    totalEnd: local.total_end ? summarizeEvent(local.total_end) : undefined,
-    partialEnd: summarizeEvent(local.partial_end),
+    totalEnd,
+    partialEnd,
+    partialDurationSeconds: secondsBetween(partialBegin.time, partialEnd.time),
+    totalityDurationSeconds:
+      totalBegin && totalEnd ? secondsBetween(totalBegin.time, totalEnd.time) : undefined,
   }
 }
 

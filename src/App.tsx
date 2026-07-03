@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, type CSSProperties } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import {
   EVENT_DURATION_MINUTES,
   EVENT_START_UTC,
@@ -6,6 +6,7 @@ import {
   find2026LocalEclipseCircumstances,
   type EclipseObservation,
   type EclipseStatus,
+  type LocalEclipseCircumstances,
   type ObserverInput,
 } from './astronomy'
 import './App.css'
@@ -39,12 +40,34 @@ function formatUtcTime(date: Date) {
   }).format(date)
 }
 
+function formatUtcClock(date: Date) {
+  return new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZone: 'UTC',
+    timeZoneName: 'short',
+  }).format(date)
+}
+
 function formatAngle(value: number) {
   return `${value.toFixed(2)}°`
 }
 
 function formatPercent(value: number) {
   return `${Math.round(value * 100)}%`
+}
+
+function formatDuration(seconds: number) {
+  const roundedSeconds = Math.max(0, Math.round(seconds))
+  const minutes = Math.floor(roundedSeconds / 60)
+  const remainder = roundedSeconds % 60
+
+  if (minutes === 0) {
+    return `${remainder}s`
+  }
+
+  return `${minutes}m ${remainder.toString().padStart(2, '0')}s`
 }
 
 function clampNumber(value: number, min: number, max: number) {
@@ -102,6 +125,18 @@ function skyBodyStyle(position: ReturnType<typeof projectSkyPosition>) {
     left: `${position.x}%`,
     top: `${position.y}%`,
   } as CSSProperties
+}
+
+function contactRows(localCircumstances: LocalEclipseCircumstances) {
+  return [
+    { label: 'Partial begins', event: localCircumstances.partialBegin },
+    { label: 'Totality begins', event: localCircumstances.totalBegin },
+    { label: 'Peak', event: localCircumstances.peak },
+    { label: 'Totality ends', event: localCircumstances.totalEnd },
+    { label: 'Partial ends', event: localCircumstances.partialEnd },
+  ].filter((row): row is { label: string; event: NonNullable<typeof row.event> } =>
+    Boolean(row.event),
+  )
 }
 
 function App() {
@@ -224,6 +259,10 @@ function App() {
               </strong>
             </div>
             <div>
+              <span>Elevation</span>
+              <strong>{Math.round(elevation)} m ephemeris input</strong>
+            </div>
+            <div>
               <span>Sun alt / az</span>
               <strong>
                 {formatAngle(observation.sun.altitudeDegrees)} /{' '}
@@ -244,7 +283,7 @@ function App() {
           <div className="panel-header">
             <div>
               <h1>Sky Preview</h1>
-              <p>Calculated from selected coordinates and UTC time</p>
+              <p>Direction markers for the local horizon</p>
             </div>
             <div className="coverage-meter">
               <span>{formatPercent(observation.obscuration)}</span>
@@ -261,12 +300,14 @@ function App() {
             <div
               className={`sky-body sun-marker${sunPosition.belowHorizon ? ' below-horizon' : ''}`}
               style={skyBodyStyle(sunPosition)}
-              title={`Sun ${formatAngle(observation.sun.altitudeDegrees)} altitude, ${formatAngle(observation.sun.azimuthDegrees)} azimuth`}
+              title={`Sun direction: ${formatAngle(observation.sun.altitudeDegrees)} altitude, ${formatAngle(observation.sun.azimuthDegrees)} azimuth`}
+              aria-label={`Sun direction ${formatAngle(observation.sun.altitudeDegrees)} altitude, ${formatAngle(observation.sun.azimuthDegrees)} azimuth`}
             />
             <div
               className={`sky-body moon-marker${moonPosition.belowHorizon ? ' below-horizon' : ''}`}
               style={skyBodyStyle(moonPosition)}
-              title={`Moon ${formatAngle(observation.moon.altitudeDegrees)} altitude, ${formatAngle(observation.moon.azimuthDegrees)} azimuth`}
+              title={`Moon direction: ${formatAngle(observation.moon.altitudeDegrees)} altitude, ${formatAngle(observation.moon.azimuthDegrees)} azimuth`}
+              aria-label={`Moon direction ${formatAngle(observation.moon.altitudeDegrees)} altitude, ${formatAngle(observation.moon.azimuthDegrees)} azimuth`}
             />
           </div>
 
@@ -283,15 +324,29 @@ function App() {
                 {formatAngle(observation.moon.apparentRadiusDegrees)}.
               </p>
             </article>
-            <article>
+            <article className="event-card">
               <span>Local 2026 event</span>
               {localCircumstances ? (
                 <>
-                  <strong>{localCircumstances.kind}</strong>
-                  <p>
-                    Peak {formatUtcTime(localCircumstances.peak.time)} at Sun altitude{' '}
-                    {formatAngle(localCircumstances.peak.sunAltitudeDegrees)}.
-                  </p>
+                  <div className="event-summary">
+                    <strong>{localCircumstances.kind} eclipse</strong>
+                    <small>
+                      {localCircumstances.totalityDurationSeconds === undefined
+                        ? `Max ${formatPercent(localCircumstances.obscuration)}`
+                        : `Totality ${formatDuration(
+                            localCircumstances.totalityDurationSeconds,
+                          )}`}
+                    </small>
+                  </div>
+                  <div className="contact-list" aria-label="Local eclipse contact times">
+                    {contactRows(localCircumstances).map((row) => (
+                      <div key={row.label}>
+                        <span>{row.label}</span>
+                        <strong>{formatUtcClock(row.event.time)}</strong>
+                        <small>{formatAngle(row.event.sunAltitudeDegrees)}</small>
+                      </div>
+                    ))}
+                  </div>
                 </>
               ) : (
                 <>
@@ -301,9 +356,9 @@ function App() {
               )}
             </article>
             <article>
-              <span>3D terrain</span>
-              <strong>Later</strong>
-              <p>Use Cesium and Google 3D Tiles after API setup.</p>
+              <span>Terrain horizon</span>
+              <strong>Pending</strong>
+              <p>Elevation-aware terrain and building blockage come with 3D mode.</p>
             </article>
           </div>
         </div>

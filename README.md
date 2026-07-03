@@ -2,7 +2,7 @@
 
 Interactive planning app for the total solar eclipse on 12 August 2026.
 
-The project is a browser-based planning console. It now has a tested astronomy core for topocentric Sun/Moon geometry, with map and 3D terrain views planned next.
+The project is a browser-based planning console. It now has a tested astronomy core for topocentric Sun/Moon geometry, local contact times, and apparent disk overlap, with map and 3D terrain views planned next.
 
 ## Run Locally
 
@@ -35,7 +35,8 @@ Current milestone:
 - React, TypeScript, and Vite project scaffold
 - coordinate/time screen backed by astronomy calculations
 - tested Sun/Moon apparent geometry, angular overlap, and eclipse status classification
-- local 2026 eclipse circumstances for selected observer coordinates
+- local 2026 eclipse contact times and totality duration for selected observer coordinates
+- symbolic sky direction markers separated from the apparent solar disk view
 - reproducible dependency lockfile
 - GitHub repository connected
 
